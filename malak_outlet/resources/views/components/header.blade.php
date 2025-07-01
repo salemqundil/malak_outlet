@@ -47,9 +47,13 @@
                         <path d="M3.96469 6.75H21L18.3262 15.4416C18.2318 15.7482 18.0415 16.0165 17.7833 16.207C17.5252 16.3975 17.2127 16.5002 16.8919 16.5H7.88156C7.55556 16.5001 7.23839 16.3941 6.97806 16.1978C6.71772 16.0016 6.5284 15.7259 6.43875 15.4125L3.04781 3.54375C3.00301 3.38711 2.90842 3.24932 2.77835 3.15122C2.64828 3.05311 2.4898 3.00003 2.32687 3H0.75"
                             stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
                     </svg>
-                    @if(session('cart') && count(session('cart')) > 0)
-                        <span class="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
-                            {{ array_sum(array_column(session('cart'), 'quantity')) }}
+                    @php
+                        $cart = json_decode(request()->cookie('cart', '[]'), true);
+                        $cartCount = array_sum($cart);
+                    @endphp
+                    @if($cartCount > 0)
+                        <span class="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center" id="cart-count">
+                            {{ $cartCount }}
                         </span>
                     @endif
                 </a>
@@ -90,3 +94,81 @@
         </form>
     </div>
 </header>
+
+<!-- Desktop Navigation -->
+<nav class="bg-orange-500 text-white px-4 md:px-10 pb-3 hidden md:block">
+    <div class="flex justify-between items-center container mx-auto flex-wrap">
+        <button class="bg-white text-orange-500 border-none py-2 px-4 rounded flex items-center font-bold text-sm lg:text-base">
+            <span class="ml-2">≡</span> تصفح جميع الفئات
+        </button>
+
+        <ul class="flex list-none m-0 p-0 flex-wrap">
+            <li class="mr-3 lg:mr-6 relative font-bold">
+                <a href="{{ route('about') }}" class="text-white no-underline text-sm lg:text-base flex items-center hover:text-yellow-300">عن الشركة</a>
+            </li>
+            <li class="mr-3 lg:mr-6 relative font-bold">
+                <a href="{{ route('offers') }}" class="text-white no-underline text-sm lg:text-base flex items-center hover:text-yellow-300">العروض</a>
+            </li>
+            <li class="mr-3 lg:mr-6 relative font-bold">
+                <a href="{{ route('products.category', 'toys-games') }}" class="text-white no-underline text-sm lg:text-base flex items-center hover:text-yellow-300">الألعاب</a>
+            </li>
+            <li class="mr-3 lg:mr-6 relative font-bold">
+                <a href="{{ route('products.category', 'electronics') }}" class="text-white no-underline text-sm lg:text-base flex items-center hover:text-yellow-300">إلكترونيات</a>
+            </li>
+            <li class="mr-3 lg:mr-6 relative font-bold">
+                <a href="{{ route('products.index') }}" class="text-white no-underline text-sm lg:text-base flex items-center hover:text-yellow-300">جميع المنتجات</a>
+            </li>
+        </ul>
+    </div>
+</nav>
+
+<!-- Mobile Menu Overlay -->
+<div x-show="mobileMenuOpen" @click="mobileMenuOpen = false"
+    class="fixed inset-0 bg-black bg-opacity-50 z-40 md:hidden" x-transition:enter="transition ease-out duration-300"
+    x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100"
+    x-transition:leave="transition ease-in duration-300" x-transition:leave-start="opacity-100"
+    x-transition:leave-end="opacity-0"></div>
+
+<!-- Mobile Side Menu -->
+<div class="fixed top-0 right-0 w-3/4 h-full bg-white shadow-2xl z-50 transform transition-transform duration-300 mobile-menu md:hidden"
+    :class="{'translate-x-0': mobileMenuOpen, 'translate-x-full': !mobileMenuOpen}" x-show="mobileMenuOpen">
+    <div class="p-4 border-b border-gray-200">
+        <div class="flex justify-between items-center">
+            <h2 class="text-lg font-bold text-orange-500">القائمة</h2>
+            <button @click="mobileMenuOpen = false" class="text-gray-500 hover:text-gray-700">
+                ✕
+            </button>
+        </div>
+    </div>
+    <div class="py-4">
+        <ul class="list-none m-0 p-0">
+            <li class="border-b border-gray-100">
+                <a href="{{ route('products.category', 'toys-games') }}" class="block py-3 px-4 text-gray-700 hover:bg-orange-50">الألعاب</a>
+            </li>
+            <li class="border-b border-gray-100">
+                <a href="{{ route('products.category', 'electronics') }}" class="block py-3 px-4 text-gray-700 hover:bg-orange-50">إلكترونيات</a>
+            </li>
+            <li class="border-b border-gray-100">
+                <a href="{{ route('offers') }}" class="block py-3 px-4 text-gray-700 hover:bg-orange-50">العروض</a>
+            </li>
+            <li class="border-b border-gray-100">
+                <a href="{{ route('about') }}" class="block py-3 px-4 text-gray-700 hover:bg-orange-50">عن الشركة</a>
+            </li>
+            <li class="border-b border-gray-100">
+                <a href="{{ route('products.index') }}" class="block py-3 px-4 text-gray-700 hover:bg-orange-50">جميع المنتجات</a>
+            </li>
+            @guest
+                <li class="border-b border-gray-100">
+                    <a href="{{ route('login') }}" class="block py-3 px-4 text-gray-700 hover:bg-orange-50">تسجيل دخول / تسجيل</a>
+                </li>
+            @else
+                <li class="border-b border-gray-100">
+                    <a href="{{ route('profile') }}" class="block py-3 px-4 text-gray-700 hover:bg-orange-50">الملف الشخصي</a>
+                </li>
+                <li class="border-b border-gray-100">
+                    <a href="{{ route('orders') }}" class="block py-3 px-4 text-gray-700 hover:bg-orange-50">طلباتي</a>
+                </li>
+            @endguest
+        </ul>
+    </div>
+</div>
